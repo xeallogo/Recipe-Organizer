@@ -1,0 +1,10 @@
+.carouselContainer {
+  margin-bottom: 100px;
+  margin-top: 60px;
+}
+
+.carouselImage {
+  display: block;
+  height: 70vh;
+  background-size: cover;
+}

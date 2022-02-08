@@ -1,0 +1,8 @@
+.main-container {
+  position: relative;
+    min-height: 100vh;
+}
+
+.icon-wrapper {
+  float: right;
+}
