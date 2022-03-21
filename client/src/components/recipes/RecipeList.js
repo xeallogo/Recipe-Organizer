@@ -63,37 +63,37 @@ function RecipeList() {
 
               <div>
                 {( () => {
-                  if (recipe.typeOfRecipe == "Appetizer") {
+                  if (recipe.typeOfRecipe === "Appetizer") {
                     return (
                       <Card.Img
                       variant="top"
                       src={process.env.PUBLIC_URL + '/appetizer.png'}
                       alt="Appetizer Image"
-                      style={{width: "30vh"}}
+                      style={{width: "200px"}}
                       />)
-                  } else if (recipe.typeOfRecipe == "Entree") {
+                  } else if (recipe.typeOfRecipe === "Entree") {
                     return (
                       <Card.Img
                       variant="top"
                       src={process.env.PUBLIC_URL + '/chicken-leg.png'}
                       alt="Entree Image"
-                      style={{width: "30vh"}}
+                      style={{width: "200px"}}
                       />)
-                  } else if (recipe.typeOfRecipe == "Side") {
+                  } else if (recipe.typeOfRecipe === "Side") {
                     return (
                       <Card.Img
                       variant="top"
                       src={process.env.PUBLIC_URL + '/salad.png'}
                       alt="Side Image"
-                      style={{width: "30vh"}}
+                      style={{width: "200px"}}
                       />)
-                  } else if (recipe.typeOfRecipe == "Dessert") {
+                  } else if (recipe.typeOfRecipe === "Dessert") {
                     return (
                       <Card.Img
                       variant="top"
                       src={process.env.PUBLIC_URL + '/cupcake.png'}
                       alt="Dessert Image"
-                      style={{width: "30vh"}}
+                      style={{width: "200px"}}
                       />
                     )
                   }
