@@ -4,6 +4,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import Title from "antd/es/typography/Title";
 import { Button, Card, Form, Input, Select } from "antd";
 import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
+import { tertiaryColor } from "../../colors";
 
 const RecipeEdit = (props) => {
   const navigate = useNavigate();
@@ -33,8 +34,8 @@ const RecipeEdit = (props) => {
   }
 
   return (
-    <div>
-      <Title>Edit a Recipe</Title>
+    <div style={{ margin: 'auto', width: '60%' }}>
+      <Title style={{ color: 'white', marginTop: '30px' }}>Edit a Recipe</Title>
       <Form
         form={form}
         onFinish={handleSubmit}
@@ -45,7 +46,7 @@ const RecipeEdit = (props) => {
         >
           <input type="hidden" />
         </Form.Item>
-        <Title level={3}>Type of Recipe</Title>
+        <Title style={{ textAlign: 'left', color: 'white', margin: "30px 0 10px 0" }} level={3}>Type of Recipe</Title>
         <Form.Item
           name="typeOfRecipe"
           rules={[{ required: true, message: 'Please select a recipe type!' }]}
@@ -57,14 +58,14 @@ const RecipeEdit = (props) => {
             <Select.Option value="dessert">Dessert</Select.Option>
           </Select>
         </Form.Item>
-        <Title level={3}>Recipe Title</Title>
+        <Title style={{ textAlign: 'left', color: 'white', margin: "30px 0 10px 0" }} level={3}>Recipe Title</Title>
         <Form.Item
           name="title"
           rules={[{ required: true, message: 'Please enter a title!' }]}
         >
           <Input />
         </Form.Item>
-        <Title level={3}>Ingredients</Title>
+        <Title style={{ textAlign: 'left', color: 'white', margin: "30px 0 10px 0" }} level={3}>Ingredients</Title>
         <Card>
           <Form.List name="ingredients">
             {(fields, { add, remove }) => (
@@ -86,7 +87,7 @@ const RecipeEdit = (props) => {
             )}
           </Form.List>
         </Card>
-        <Title level={3}>Procedure</Title>
+        <Title style={{ textAlign: 'left', color: 'white', margin: "30px 0 10px 0" }} level={3}>Preparation</Title>
         <Card>
           <Form.List name="procedure">
             {(fields, { add, remove }) => (
@@ -108,11 +109,11 @@ const RecipeEdit = (props) => {
             )}
           </Form.List>
         </Card>
-        <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
-          <Button type="primary" htmlType="submit">
+        <Form.Item >
+          <Button style={{margin: '20px 5px', backgroundColor: tertiaryColor}} type="primary" htmlType="submit">
             Submit
           </Button>
-          <Button type="primary" danger onClick={() => navigate("/recipes")}>
+          <Button style={{margin: '20px 5px', backgroundColor: 'gray'}} type="primary" danger onClick={() => navigate("/recipes")}>
             Cancel
           </Button>
         </Form.Item>

@@ -16,7 +16,7 @@ const recipeSchema = new mongoose.Schema({
   }],
   procedure: [{
     type: String,
-    required: [true, "Procedure are required."]
+    required: [true, "Preparation are required."]
   }]
 });
 

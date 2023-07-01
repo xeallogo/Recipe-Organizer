@@ -1,114 +1,92 @@
 import React, { useState, useEffect } from 'react';
-import  axios  from 'axios';
-import { Link } from 'react-router-dom';
-import Button from 'react-bootstrap/Button';
-import Card from 'react-bootstrap/Card';
-import CardGroup from 'react-bootstrap/CardGroup';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+import { tertiaryColor } from '../../colors';
+import { SearchOutlined } from '@ant-design/icons';
+import { Card, Button, Typography, Input, Avatar } from 'antd';
+const { Title } = Typography;
+const { Meta } = Card;
 
-
+const getIcon = (recipe) => {
+  if (recipe.typeOfRecipe === "Appetizer") {
+    return process.env.PUBLIC_URL + '/appetizer.png'
+  } else if (recipe.typeOfRecipe === "Entree") {
+    return process.env.PUBLIC_URL + '/chicken-leg.png'
+  } else if (recipe.typeOfRecipe === "Side") {
+    return process.env.PUBLIC_URL + '/salad.png'
+  } else if (recipe.typeOfRecipe === "Dessert") {
+    return process.env.PUBLIC_URL + '/cupcake.png'
+  }
+}
 
 const RecipeList = () => {
   const [recipes, setRecipes] = useState([]);
-  const [ newSearch, setNewSearch ] = useState('');
-
+  const [newSearch, setNewSearch] = useState('');
+  const navigate = useNavigate();
 
   useEffect(() => {
     const getRecipes = async () => {
       try {
         const response = await axios.get("/api/recipes");
         setRecipes(response.data);
-      } catch(error) {
+      } catch (error) {
         console.log('error', error);
       }
     };
     getRecipes();
   }, []);
 
-  const handleSearch = (event) => {
-    const search = event.target.value;
-    setNewSearch(search);
-  };
-
   const showSearchResults = newSearch
     ? recipes.sort((a, b) => a.title.localeCompare(b.title)).filter(recipe =>
-    recipe.title.toUpperCase().includes(newSearch.toUpperCase()))
+      recipe.title.toUpperCase().includes(newSearch.toUpperCase()))
     : recipes.sort((a, b) => a.title.localeCompare(b.title));
 
   return (
-    <div>
-      <h1>
-        Recipe List
-        <Link to="/recipes/new" className="btn btn-lg btn-primary float-right" style={{float: "right"}}>Create Recipe</Link>
-      </h1>
-
-      <div className="input-group float-right rounded">
-        <div className="form-outline">
-          <input type="search" id="form1" className="form-control" placeholder="Search" onChange={handleSearch} value={newSearch}/>
-        </div>
-        <button type="submit" className="btn btn-primary" onSubmit={handleSearch}>
-          <i className="fas fa-search"></i>
-        </button>
+    <div style={{ width: '80%' }}>
+      <Title style={{ color: 'white', marginTop: '15px' }}>Your Book</Title>
+      <div style={{ display: 'flex' }}>
+        <Input.Search
+          allowClear
+          onSearch={(value) => setNewSearch(value)}
+          style={{ width: '40%' }}
+          placeholder='Search for a recipe by title'
+          size='large'
+          enterButton={(
+            <Button type="primary" style={{ backgroundColor: tertiaryColor}}>
+              <SearchOutlined/>
+            </Button>
+          )}
+        />
+        <Button
+          type='primary'
+          size='large'
+          style={{ marginLeft: 'auto', backgroundColor: tertiaryColor }}
+          onClick={() => navigate('/recipes/new')}
+        >
+          Create Recipe
+        </Button>
       </div>
-
-      <hr/>
-
-      <CardGroup>
-      {showSearchResults.map(recipe => {
-        return(
-          <div key={recipe._id}>
-            <Card style={{ width: '15rem', margin: "15px" }}>
-
-
-              <div>
-                {( () => {
-                  if (recipe.typeOfRecipe === "Appetizer") {
-                    return (
-                      <Card.Img
-                      variant="top"
-                      src={process.env.PUBLIC_URL + '/appetizer.png'}
-                      alt="Appetizer Image"
-                      style={{width: "200px"}}
-                      />)
-                  } else if (recipe.typeOfRecipe === "Entree") {
-                    return (
-                      <Card.Img
-                      variant="top"
-                      src={process.env.PUBLIC_URL + '/chicken-leg.png'}
-                      alt="Entree Image"
-                      style={{width: "200px"}}
-                      />)
-                  } else if (recipe.typeOfRecipe === "Side") {
-                    return (
-                      <Card.Img
-                      variant="top"
-                      src={process.env.PUBLIC_URL + '/salad.png'}
-                      alt="Side Image"
-                      style={{width: "200px"}}
-                      />)
-                  } else if (recipe.typeOfRecipe === "Dessert") {
-                    return (
-                      <Card.Img
-                      variant="top"
-                      src={process.env.PUBLIC_URL + '/cupcake.png'}
-                      alt="Dessert Image"
-                      style={{width: "200px"}}
-                      />
-                    )
-                  }
-                })()}
+      <hr />
+      <Card style={{ margin: '40px 0', backgroundColor: 'lightgrey' }}>
+        <div style={{ display: 'flex', flexFlow: 'row wrap' }}>
+          {showSearchResults.map(recipe => {
+            return (
+              <div onClick={() => navigate(`/recipes/${recipe._id}`)} key={recipe._id}>
+                <Card
+                  hoverable
+                  style={{ display: 'flex', margin: '10px' }}
+                >
+                  <Meta
+                    avatar={<Avatar size="large" src={getIcon(recipe)} />}
+                    title={recipe.title}
+                  />
+                </Card>
               </div>
+            )
+          })}
+        </div>
+      </Card>
 
-              <Card.Body>
-                  <Card.Title><h2>{recipe.title}</h2> <h5>({recipe.typeOfRecipe})</h5></Card.Title>
-                  <Card.Text>
-                  </Card.Text>
-                <Link to={`/recipes/${recipe._id}`}><Button variant="secondary">Go to recipe</Button></Link>
-              </Card.Body>
-            </Card>
-          </div>
-        )
-      })}
-      </CardGroup>
     </div>
   )
 }
