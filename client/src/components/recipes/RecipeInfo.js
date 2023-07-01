@@ -2,13 +2,13 @@ import React, { useState, useEffect } from "react";
 import axios from 'axios';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 
-function RecipeInfo(props) {
+const  RecipeInfo = (props) => {
   const [recipe, setRecipe] = useState({});
   const { _id } = useParams();
   const navigate = useNavigate();
 
-  useEffect(function() {
-    async function getRecipe() {
+  useEffect(() => {
+    const getRecipe = async () => {
       try {
         const response = await axios.get(`/api/recipes/${_id}/`);
         setRecipe(response.data);
@@ -16,11 +16,10 @@ function RecipeInfo(props) {
         console.log('error', error);
       }
     }
-
     getRecipe();
   }, [props, _id]);
 
-  async function handleDelete() {
+  const handleDelete = async () => {
     try {
       await axios.delete(`/api/recipes/${_id}/`);
       navigate("/recipes");
@@ -29,12 +28,8 @@ function RecipeInfo(props) {
     }
   }
 
-
-  let ingredientList = recipe.ingredients?.split(",");
-  let procedureList = recipe.procedure?.split("Step:");
-  procedureList?.shift();
-
-
+  let ingredientList = recipe.ingredients;
+  let procedureList = recipe.procedure;
 
   return (
     <div>
@@ -43,13 +38,13 @@ function RecipeInfo(props) {
       <h3 style={{margin: "30px 0 10px 0"}}>Ingredients</h3>
         <ul>
           {ingredientList?.map((ingredient, i) =>
-            <li key={i}>{ingredientList[i]}</li>
+            <li key={i}>{ingredient}</li>
           )}
         </ul>
       <h3 style={{margin: "30px 0 10px 0"}}>Preparation</h3>
         <ol>
           {procedureList?.map((step, i) =>
-            <li key={i}>{procedureList[i]}</li>
+            <li key={i}>{step}</li>
           )}
         </ol>
       <div className="btn-group" style={{margin: "50px 0 0 0"}}>

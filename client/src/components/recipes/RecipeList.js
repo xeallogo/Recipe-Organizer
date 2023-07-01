@@ -7,13 +7,13 @@ import CardGroup from 'react-bootstrap/CardGroup';
 
 
 
-function RecipeList() {
+const RecipeList = () => {
   const [recipes, setRecipes] = useState([]);
   const [ newSearch, setNewSearch ] = useState('');
 
 
-  useEffect(function() {
-    async function getRecipes() {
+  useEffect(() => {
+    const getRecipes = async () => {
       try {
         const response = await axios.get("/api/recipes");
         setRecipes(response.data);
@@ -29,12 +29,10 @@ function RecipeList() {
     setNewSearch(search);
   };
 
-  // console.log(newSearch);
   const showSearchResults = newSearch
     ? recipes.sort((a, b) => a.title.localeCompare(b.title)).filter(recipe =>
     recipe.title.toUpperCase().includes(newSearch.toUpperCase()))
     : recipes.sort((a, b) => a.title.localeCompare(b.title));
-
 
   return (
     <div>

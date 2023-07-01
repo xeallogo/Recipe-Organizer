@@ -1,89 +1,112 @@
-import React, { useState } from "react";
+import React from "react";
 import { post } from 'axios';
 import { useNavigate } from "react-router-dom";
+import { Form, Input, Typography, Button, Select, Card } from 'antd';
+import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
+const { Title } = Typography;
 
-
-
-function RecipeAdd(props) {
-  const initialState = {
-    typeOfRecipe: '',
-    title: '',
-    ingredients: '',
-    procedure: ''
-  }
-  const [recipe, setRecipe] = useState(initialState);
+const RecipeAdd = (props) => {
+  const [form] = Form.useForm();
   const navigate = useNavigate();
 
-
-  function handleChange(event) {
-    setRecipe({...recipe, [event.target.name]: event.target.value})
+  const initialValues = {
+    typeOfRecipe: '',
+    title: '',
+    ingredients: [''],
+    procedure: ['']
   }
 
-
-  function handleSubmit(event) {
-    event.preventDefault();
-    if(!recipe.title || !recipe.ingredients || !recipe.procedure) return
-    async function postRecipe() {
-      try {
-        const response = await post('/api/recipes', recipe);
-        navigate(`/recipes/${response.data._id}`);
-      } catch(error) {
-        console.log('error', error);
-      }
+  const handleSubmit = async (params) => {
+    try {
+      const response = await post('/api/recipes', params);
+      navigate(`/recipes/${response.data._id}`);
+    } catch (error) {
+      console.log('error', error);
     }
-    postRecipe();
-    navigate("/recipes")
+    navigate(`/recipes/${params._id}`)
   }
-
-  function handleCancel() {
-    navigate("/recipes");
-  }
-
-  const inputStyle = {
-    margin: "5px"
-  }
-  const buttonStyle = {
-    marginBottom: "80px",
-    marginTop: "20px"
-  }
-
 
   return (
     <div>
-      <h1>New Recipe</h1>
-      <hr/>
-      <form onSubmit={handleSubmit}>
+      <Title>Create a Recipe</Title>
 
-        <div className="form-group">
-          <h5>Type of Recipe</h5>
-          <select name="typeOfRecipe" value={recipe.typeOfRecipe} onChange={handleChange} className="form-control">
-            <option value="Appetizer">Appetizer</option>
-            <option value="Entree">Entree</option>
-            <option value="Side">Side</option>
-            <option value="Dessert">Dessert</option>
-          </select>
-        </div>
-
-        <div className="form-group">
-          <h5 style={{margin: "30px 0 10px 0"}}>Title</h5>
-          <input name="title" type="text" value={recipe.title} onChange={handleChange} className="form-control" style={inputStyle} />
-        </div>
-
-        <div className="form-group">
-          <h5 style={{margin: "30px 0 10px 0"}}>Ingredients</h5>
-          <textarea name="ingredients" rows="5" value={recipe.ingredients} onChange={handleChange} className="form-control" style={inputStyle} placeholder="Ingredients must be separated by a comma." />
-        </div>
-
-        <div className="form-group">
-          <h5 style={{margin: "30px 0 10px 0"}}>Preparation</h5>
-          <textarea name="procedure" rows="5" value={recipe.procedure} onChange={handleChange} className="form-control" style={inputStyle} placeholder="Steps in the preparation must each begin with 'Step'."/>
-        </div>
-
-        <div className="btn-group">
-          <input type="submit" value="Submit" className="btn btn-primary" style={buttonStyle}/>
-          <button type="button" onClick={handleCancel} className="btn btn-secondary" style={buttonStyle}>Cancel</button>
-        </div>
-      </form>
+      <Form
+        form={form}
+        onFinish={handleSubmit}
+        initialValues={initialValues}
+      >
+        <Title level={3}>Type of Recipe</Title>
+        <Form.Item
+          name="typeOfRecipe"
+          rules={[{ required: true, message: 'Please select a recipe type!' }]}
+        >
+          <Select>
+            <Select.Option value="Appetizer">Appetizer</Select.Option>
+            <Select.Option value="Entree">Entree</Select.Option>
+            <Select.Option value="Side">Side</Select.Option>
+            <Select.Option value="Dessert">Dessert</Select.Option>
+          </Select>
+        </Form.Item>
+        <Title level={3}>Recipe Title</Title>
+        <Form.Item
+          name="title"
+          rules={[{ required: true, message: 'Please enter a title!' }]}
+        >
+          <Input />
+        </Form.Item>
+        <Title level={3}>Ingredients</Title>
+        <Card>
+          <Form.List name="ingredients">
+            {(fields, { add, remove }) => (
+              <>
+                {fields.map(({ key, name, ...restField }) => (
+                  <div key={key} style={{ display: "flex", marginBottom: 8 }} align="baseline">
+                    <Form.Item {...restField} name={name} rules={[{ required: true, message: "Missing ingredient" }]}>
+                      <Input placeholder="Ingredient" />
+                    </Form.Item>
+                    <MinusCircleOutlined onClick={() => remove(name)} />
+                  </div>
+                ))}
+                <Form.Item>
+                  <Button type="dashed" onClick={() => add()} block icon={<PlusOutlined />}>
+                    Add an ingredient
+                  </Button>
+                </Form.Item>
+              </>
+            )}
+          </Form.List>
+        </Card>
+        <Title level={3}>Procedure</Title>
+        <Card>
+          <Form.List name="procedure">
+            {(fields, { add, remove }) => (
+              <>
+                {fields.map(({ key, name, ...restField }) => (
+                  <div key={key} style={{ display: "flex", marginBottom: 8 }} align="baseline">
+                    <Form.Item {...restField} name={name} rules={[{ required: true, message: "Missing step" }]}>
+                      <Input placeholder="Step" />
+                    </Form.Item>
+                    <MinusCircleOutlined onClick={() => remove(name)} />
+                  </div>
+                ))}
+                <Form.Item>
+                  <Button type="dashed" onClick={() => add()} block icon={<PlusOutlined />}>
+                    Add a step
+                  </Button>
+                </Form.Item>
+              </>
+            )}
+          </Form.List>
+        </Card>
+        <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
+          <Button type="primary" htmlType="submit">
+            Submit
+          </Button>
+          <Button type="primary" danger onClick={() => navigate("/recipes")}>
+            Cancel
+          </Button>
+        </Form.Item>
+      </Form>
     </div>
   );
 }

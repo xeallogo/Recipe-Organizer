@@ -1,95 +1,122 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import axios from 'axios';
 import { useNavigate, useParams } from "react-router-dom";
+import Title from "antd/es/typography/Title";
+import { Button, Card, Form, Input, Select } from "antd";
+import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
 
-
-function RecipeEdit(props) {
-  const [recipe, setRecipe] = useState({})
+const RecipeEdit = (props) => {
   const navigate = useNavigate();
   const { _id } = useParams();
+  const [form] = Form.useForm();
 
-
-
-
-  useEffect(function() {
-    async function getRecipe() {
+  useEffect(() => {
+    const getRecipe = async () => {
       try {
         const response = await axios.get(`/api/recipes/${_id}`);
-        setRecipe(response.data);
-      } catch(error) {
+        form.setFieldsValue(response.data)
+      } catch (error) {
         console.log(error);
       }
     }
     getRecipe();
-  }, [props, _id]);
+  }, [props, _id, form]);
 
-  function handleSubmit(event) {
-    event.preventDefault();
-    async function updateRecipe() {
-      try {
-        await axios.patch(`/api/recipes/${_id}`, recipe);
-        navigate(`/recipes/${_id}`);
-      } catch(error) {
-        console.log(error);
-      }
+  const handleSubmit = async (params) => {
+    try {
+      await axios.patch(`/api/recipes/${_id}`, params);
+      navigate(`/recipes/${_id}`);
+    } catch (error) {
+      console.log(error);
     }
-    updateRecipe();
-    navigate("/recipes")
-  }
-
-  function handleChange(event) {
-    setRecipe({...recipe, [event.target.name]: event.target.value})
-  }
-
-  function handleCancel() {
-    navigate(`/recipes/${_id}`);
-  }
-
-  const inputStyle = {
-    margin: "5px"
-  }
-
-  const buttonStyle = {
-    marginBottom: "80px",
-    marginTop: "20px"
+    navigate(`/recipes/${params._id}`)
   }
 
   return (
     <div>
-      <h1>Edit Recipe</h1>
-      <hr/>
-      <form onSubmit={handleSubmit}>
-
-
-
-      <div className="form-group">
-        <h5>Type of Recipe</h5>
-        <select name="typeOfRecipe" value={recipe.typeOfRecipe} onChange={handleChange}>
-          <option value="Appetizer">Appetizer</option>
-          <option value="Entree">Entree</option>
-          <option value="Side">Side</option>
-          <option value="Dessert">Dessert</option>
-        </select>
-      </div>
-
-      <div className="form-group">
-        <h5>Title:</h5>
-        <input name="title" type="text" value={recipe.title} onChange={handleChange} className="form-control" style={inputStyle}/>
-      </div>
-      <div className="form-group">
-        <h5>Ingredients:</h5>
-        <textarea name="ingredients" rows="5" value={recipe.ingredients} onChange={handleChange} className="form-control" style={inputStyle}/>
-      </div>
-      <div className="form-group">
-        <h5>Procedure:</h5>
-        <textarea name="procedure" rows="5" value={recipe.procedure} onChange={handleChange} className="form-control" style={inputStyle} />
-      </div>
-
-      <div className="btn-group">
-        <input type="submit" value="Submit" className="btn btn-primary" style={buttonStyle}/>
-        <button type="button" onClick={handleCancel} className="btn btn-secondary" style={buttonStyle}>Cancel</button>
-      </div>
-      </form>
+      <Title>Edit a Recipe</Title>
+      <Form
+        form={form}
+        onFinish={handleSubmit}
+      >
+        <Form.Item
+          name="_id"
+          hidden
+        >
+          <input type="hidden" />
+        </Form.Item>
+        <Title level={3}>Type of Recipe</Title>
+        <Form.Item
+          name="typeOfRecipe"
+          rules={[{ required: true, message: 'Please select a recipe type!' }]}
+        >
+          <Select>
+            <Select.Option value="appetizer">Appetizer</Select.Option>
+            <Select.Option value="entree">Entree</Select.Option>
+            <Select.Option value="side">Side</Select.Option>
+            <Select.Option value="dessert">Dessert</Select.Option>
+          </Select>
+        </Form.Item>
+        <Title level={3}>Recipe Title</Title>
+        <Form.Item
+          name="title"
+          rules={[{ required: true, message: 'Please enter a title!' }]}
+        >
+          <Input />
+        </Form.Item>
+        <Title level={3}>Ingredients</Title>
+        <Card>
+          <Form.List name="ingredients">
+            {(fields, { add, remove }) => (
+              <>
+                {fields.map(({ key, name, ...restField }) => (
+                  <div key={key} style={{ marginBottom: 8 }} align="baseline">
+                    <Form.Item {...restField} name={name} rules={[{ required: true, message: "Missing ingredient" }]}>
+                      <Input placeholder="Ingredient" />
+                    </Form.Item>
+                    <MinusCircleOutlined onClick={() => remove(name)} />
+                  </div>
+                ))}
+                <Form.Item>
+                  <Button type="dashed" onClick={() => add()} block icon={<PlusOutlined />}>
+                    Add an ingredient
+                  </Button>
+                </Form.Item>
+              </>
+            )}
+          </Form.List>
+        </Card>
+        <Title level={3}>Procedure</Title>
+        <Card>
+          <Form.List name="procedure">
+            {(fields, { add, remove }) => (
+              <>
+                {fields.map(({ key, name, ...restField }) => (
+                  <div key={key} style={{ marginBottom: 8 }} align="baseline">
+                    <Form.Item {...restField} name={name} rules={[{ required: true, message: "Missing step" }]}>
+                      <Input placeholder="Step" />
+                    </Form.Item>
+                    <MinusCircleOutlined onClick={() => remove(name)} />
+                  </div>
+                ))}
+                <Form.Item>
+                  <Button type="dashed" onClick={() => add()} block icon={<PlusOutlined />}>
+                    Add a step
+                  </Button>
+                </Form.Item>
+              </>
+            )}
+          </Form.List>
+        </Card>
+        <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
+          <Button type="primary" htmlType="submit">
+            Submit
+          </Button>
+          <Button type="primary" danger onClick={() => navigate("/recipes")}>
+            Cancel
+          </Button>
+        </Form.Item>
+      </Form>
     </div>
   );
 }
