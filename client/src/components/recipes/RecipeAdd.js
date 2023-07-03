@@ -38,8 +38,9 @@ const RecipeAdd = (props) => {
         <Form.Item
           name="typeOfRecipe"
           rules={[{ required: true, message: 'Please select a recipe type!' }]}
+          placeholder="Type of recipe"
         >
-          <Select>
+          <Select >
             <Select.Option value="Appetizer">Appetizer</Select.Option>
             <Select.Option value="Entree">Entree</Select.Option>
             <Select.Option value="Side">Side</Select.Option>
@@ -51,7 +52,7 @@ const RecipeAdd = (props) => {
           name="title"
           rules={[{ required: true, message: 'Please enter a title!' }]}
         >
-          <Input />
+          <Input placeholder="Title" />
         </Form.Item>
         <Title style={{ textAlign: 'left', color: 'white', margin: "30px 0 10px 0" }} level={3}>Ingredients</Title>
         <Card>
@@ -59,11 +60,20 @@ const RecipeAdd = (props) => {
             {(fields, { add, remove }) => (
               <>
                 {fields.map(({ key, name, ...restField }) => (
-                  <div key={key} style={{ display: "flex", marginBottom: 8 }} align="baseline">
-                    <Form.Item {...restField} name={name} rules={[{ required: true, message: "Missing ingredient" }]}>
-                      <Input placeholder="Ingredient" />
+                  <div key={key} style={{ marginBottom: '15px' }} >
+                    <Form.Item
+                      {...restField}
+                      name={name}
+                      rules={[{ required: true, message: "Missing ingredient" }]}
+                    >
+                      <Input
+                        addonAfter={(
+                          <MinusCircleOutlined
+                            onClick={() => remove(name)}
+                          />
+                        )}
+                        placeholder="Ingredient" />
                     </Form.Item>
-                    <MinusCircleOutlined onClick={() => remove(name)} />
                   </div>
                 ))}
                 <Form.Item>
@@ -80,12 +90,21 @@ const RecipeAdd = (props) => {
           <Form.List name="procedure">
             {(fields, { add, remove }) => (
               <>
-                {fields.map(({ key, name, ...restField }) => (
-                  <div key={key} style={{ display: "flex", marginBottom: 8 }} align="baseline">
-                    <Form.Item {...restField} name={name} rules={[{ required: true, message: "Missing step" }]}>
-                      <Input placeholder="Step" />
+              {fields.map(({ key, name, ...restField }) => (
+                  <div key={key} style={{ marginBottom: '15px' }} >
+                    <Form.Item
+                      {...restField}
+                      name={name}
+                      rules={[{ required: true, message: "Missing step" }]}
+                    >
+                      <Input
+                        addonAfter={(
+                          <MinusCircleOutlined
+                            onClick={() => remove(name)}
+                          />
+                        )}
+                        placeholder="Step" />
                     </Form.Item>
-                    <MinusCircleOutlined onClick={() => remove(name)} />
                   </div>
                 ))}
                 <Form.Item>
@@ -98,10 +117,10 @@ const RecipeAdd = (props) => {
           </Form.List>
         </Card>
         <Form.Item >
-          <Button style={{margin: '20px 5px', backgroundColor: tertiaryColor}} type="primary" htmlType="submit">
+          <Button style={{ margin: '20px 5px', backgroundColor: tertiaryColor }} type="primary" htmlType="submit">
             Submit
           </Button>
-          <Button style={{margin: '20px 5px', backgroundColor: 'gray'}} type="primary" danger onClick={() => navigate("/recipes")}>
+          <Button style={{ margin: '20px 5px', backgroundColor: 'gray' }} type="primary" danger onClick={() => navigate("/recipes")}>
             Cancel
           </Button>
         </Form.Item>

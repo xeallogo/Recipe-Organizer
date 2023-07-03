@@ -24,6 +24,7 @@ const RecipeInfo = (props) => {
 
   const handleDelete = () => {
     Modal.warning({
+      okText: 'Yes',
       closable: true,
       title: 'Wait!',
       content: 'Are you sure you want to delete this recipe?',

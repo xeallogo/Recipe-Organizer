@@ -71,11 +71,20 @@ const RecipeEdit = (props) => {
             {(fields, { add, remove }) => (
               <>
                 {fields.map(({ key, name, ...restField }) => (
-                  <div key={key} style={{ marginBottom: 8 }} align="baseline">
-                    <Form.Item {...restField} name={name} rules={[{ required: true, message: "Missing ingredient" }]}>
-                      <Input placeholder="Ingredient" />
+                  <div key={key} style={{ marginBottom: '15px' }} >
+                    <Form.Item
+                      {...restField}
+                      name={name}
+                      rules={[{ required: true, message: "Missing ingredient" }]}
+                    >
+                      <Input
+                        addonAfter={(
+                          <MinusCircleOutlined
+                            onClick={() => remove(name)}
+                          />
+                        )}
+                        placeholder="Ingredient" />
                     </Form.Item>
-                    <MinusCircleOutlined onClick={() => remove(name)} />
                   </div>
                 ))}
                 <Form.Item>
@@ -92,12 +101,21 @@ const RecipeEdit = (props) => {
           <Form.List name="procedure">
             {(fields, { add, remove }) => (
               <>
-                {fields.map(({ key, name, ...restField }) => (
-                  <div key={key} style={{ marginBottom: 8 }} align="baseline">
-                    <Form.Item {...restField} name={name} rules={[{ required: true, message: "Missing step" }]}>
-                      <Input placeholder="Step" />
+              {fields.map(({ key, name, ...restField }) => (
+                  <div key={key} style={{ marginBottom: '15px' }} >
+                    <Form.Item
+                      {...restField}
+                      name={name}
+                      rules={[{ required: true, message: "Missing step" }]}
+                    >
+                      <Input
+                        addonAfter={(
+                          <MinusCircleOutlined
+                            onClick={() => remove(name)}
+                          />
+                        )}
+                        placeholder="Step" />
                     </Form.Item>
-                    <MinusCircleOutlined onClick={() => remove(name)} />
                   </div>
                 ))}
                 <Form.Item>
