@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { tertiaryColor } from '../../colors';
 const { Title } = Typography;
 
-function Home() {
+const Home = () => {
   const navigate = useNavigate()
   return (
     <div style={{ textAlign: 'center' }}>

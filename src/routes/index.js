@@ -1,56 +1,115 @@
-const express = require ('express');
-const router = express.Router();
-const Recipe = require('../models/recipe');
+import { Router } from 'express';
+import Recipe from '../models/recipe.js';
+import User from '../models/user.js';
+import passport from 'passport';
+import connectEnsureLogin from 'connect-ensure-login';
+
+const router = Router();
+
+router.post('/signup', (req, res) => {
+  User.register(
+    new User({
+      username: req.body.username,
+    }), req.body.password, (err, msg) => {
+      if (err) {
+        res.send(err);
+      } else {
+        res.status(201).send({ message: "Successful" });
+      }
+    }
+  )
+});
+
+router.post("/login", passport.authenticate("local", {
+  successMessage: true,
+  failureMessage: true,
+  failureRedirect: '/login'
+}), (req, res) => {
+  res.status(200).send('You are successfully logged in!');
+});
+
+router.get("/loggedin", (req, res) => {
+  if (req.isAuthenticated()) {
+    res.status(200).send('User is logged in.');
+  } else {
+    res.status(401).send('User is not authenticated.');
+  }
+});
+
+router.get('/logout', (req, res) => {
+  req.logout();
+  res.status(200).send('You are successfully logged out!');
+});
 
 router.get('/recipes', (req, res) => {
-  Recipe.find((err, foundRecipes) => {
-    res.json(foundRecipes);
-  });
+  if (req.isAuthenticated()) {
+    Recipe.find((err, foundRecipes) => {
+      res.json(foundRecipes);
+    });
+  } else {
+    res.status(401).send('User is not authenticated.');
+  }
 });
 
 router.get('/recipes/:_id', (req, res) => {
-  Recipe.findById(req.params._id, (err, foundRecipe) => {
-    if (!foundRecipe) {
-      res.status(404).send('No result found.');
-    } else {
-      res.json(foundRecipe);
-    }
-  });
+  if (req.isAuthenticated()) {
+    Recipe.findById(req.params._id, (err, foundRecipe) => {
+      if (!foundRecipe) {
+        res.status(404).send('No result found.');
+      } else {
+        res.json(foundRecipe);
+      }
+    });
+  } else {
+    res.status(401).send('User is not authenticated.');
+  }
 });
 
-router.post('/recipes', (req, res) => {
-  let recipe = new Recipe(req.body);
-  recipe.save()
-    .then(recipe => {
-      res.send(recipe);
-    })
-    .catch((err) => {
-      res.status(422).send('Recipe add failed.');
-    });
+router.post('/recipes', async (req, res) => {
+  if (req.isAuthenticated()) {
+    const recipe = new Recipe(req.body);
+    await recipe.save()
+      .then(recipe => {
+        res.send(recipe);
+      })
+      .catch((err) => {
+        res.status(422).send('Recipe add failed.');
+      });
+  } else {
+    res.status(401).send('User is not authenticated.');
+  }
 });
 
 router.patch('/recipes/:_id', (req, res) => {
-  Recipe.findByIdAndUpdate(req.params._id, req.body)
-    .then(() => {
-      res.json('Recipe updated.');
-    })
-    .catch((err) => {
-      res.status(422).send("Recipe update failed.");
-    });
+  if (req.isAuthenticated()) {
+    Recipe.findByIdAndUpdate(req.params._id, req.body)
+      .then(() => {
+        res.json('Recipe updated.');
+      })
+      .catch((err) => {
+        res.status(422).send("Recipe update failed.");
+      });
+  } else {
+    res.status(401).send('User is not authenticated.');
+  }
 });
 
 router.delete('/recipes/:_id', (req, res) => {
-  Recipe.findById(req.params._id, (err, foundRecipe) => {
-    if (!foundRecipe) {
-      res.status(404).send('Recipe not found.');
-    } else {
-      Recipe.findByIdAndRemove(req.params._id)
-        .then(() => { res.status(200).json("Recipe deleted.") })
-        .catch((err) => {
-          res.status(400).send("Recipe delete failed.");
-        })
-    }
-  });
+  if (req.isAuthenticated()) {
+    Recipe.findById(req.params._id, (err, foundRecipe) => {
+      if (!foundRecipe) {
+        res.status(404).send('Recipe not found.');
+      } else {
+        Recipe.findByIdAndRemove(req.params._id)
+          .then(() => { res.status(200).json("Recipe deleted.") })
+          .catch((err) => {
+            res.status(400).send("Recipe delete failed.");
+          })
+      }
+    });
+  } else {
+    res.status(401).send('User is not authenticated.');
+  }
 })
 
-module.exports = router;
+export default router;

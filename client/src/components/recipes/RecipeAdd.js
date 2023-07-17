@@ -6,7 +6,7 @@ import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
 import { tertiaryColor } from "../../colors";
 const { Title } = Typography;
 
-const RecipeAdd = (props) => {
+const RecipeAdd = () => {
   const [form] = Form.useForm();
   const navigate = useNavigate();
 

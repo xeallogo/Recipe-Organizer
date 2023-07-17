@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 import { BrowserRouter as Router, Route, Routes, useNavigate } from 'react-router-dom';
 import './App.css';
 import Home from './components/pages/Home';
@@ -8,6 +9,8 @@ import RecipeAdd from './components/recipes/RecipeAdd';
 import RecipeEdit from './components/recipes/RecipeEdit';
 import { Button, Layout, Menu } from 'antd';
 import { primaryColor, secondaryColor } from './colors';
+import LoginPage from './components/pages/Login';
+import SignupPage from './components/pages/Signup';
 const { Content, Header, Footer } = Layout;
 
 const headerStyle = {
@@ -55,6 +58,66 @@ const App = () => {
 const Navigation = () => {
   const today = new Date();
   const navigate = useNavigate();
+  const [loggedIn, setLoggedIn] = useState(false);
+
+  useEffect(() => {
+    axios.get('/api/loggedin')
+      .then(res => {
+        if (res.status === 200) {
+          setLoggedIn(true);
+        }
+      })
+      .catch((error) => {
+        setLoggedIn(false)
+    });
+  }, []);
+
+  const handleLogout = async () => {
+    try {
+      setLoggedIn(false)
+      await axios.get('/api/logout', {});
+      navigate('/login')
+    } catch (error) {
+      console.log('error', error);
+    }
+  }
+
+  const loggedInItems = [
+    {
+      label: (
+        <Button
+          type='link'
+          onClick={() => navigate('/')}
+          style={{ color: 'white' }}
+        >
+          Home
+        </Button>
+      ),
+    },
+    {
+      label: (
+        <Button
+          type='link'
+          onClick={() => navigate('/recipes')}
+          style={{ color: 'white' }}
+        >
+          Recipes
+        </Button>
+      ),
+    },
+    {
+      label: (
+        <Button
+          type='link'
+          onClick={handleLogout}
+          style={{ color: 'white' }}
+        >
+          Logout
+        </Button>
+      ),
+    }
+  ]
+
   return (
     <div>
       <Layout style={layoutStyle}>
@@ -62,35 +125,14 @@ const Navigation = () => {
           <Menu
             style={{ backgroundColor: secondaryColor, color: 'white' }}
             mode="horizontal"
-            items={[
-              {
-                label: (
-                  <Button
-                    type='link'
-                    onClick={() => navigate('/')}
-                    style={{ color: 'white' }}
-                  >
-                    Home
-                  </Button>
-                ),
-              },
-              {
-                label: (
-                  <Button
-                    type='link'
-                    onClick={() => navigate('/recipes')}
-                    style={{ color: 'white' }}
-                  >
-                    Recipes
-                  </Button>
-                ),
-              }
-            ]}
+            items={loggedIn ? loggedInItems : []}
           >
           </Menu>
         </Header>
         <Content style={contentStyle}>
           <Routes>
+            <Route path="/login" element={<LoginPage setLoggedIn={setLoggedIn}/>} />
+            <Route path="/signup" element={<SignupPage />} />
             <Route path="/recipes" element={<RecipeList />} />
             <Route path="/recipes/new" element={<RecipeAdd />} />
             <Route path="/recipes/:_id" element={<RecipeInfo />} />
@@ -106,7 +148,6 @@ const Navigation = () => {
         </Footer>
       </Layout>
     </div>
-
   );
 }
 
