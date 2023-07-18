@@ -1,34 +1,32 @@
+/* eslint-disable import/extensions */
 import { Router } from 'express';
+import passport from 'passport';
 import Recipe from '../models/recipe.js';
 import User from '../models/user.js';
-import passport from 'passport';
-import connectEnsureLogin from 'connect-ensure-login';
 
 const router = Router();
 
 router.post('/signup', (req, res) => {
-  User.register(
-    new User({
-      username: req.body.username,
-    }), req.body.password, (err, msg) => {
-      if (err) {
-        res.send(err);
-      } else {
-        res.status(201).send({ message: "Successful" });
-      }
+  User.register(new User({
+    username: req.body.username,
+  }), req.body.password, (err) => {
+    if (err) {
+      res.send(err);
+    } else {
+      res.status(201).send({ message: 'Successful' });
     }
-  )
+  });
 });
 
-router.post("/login", passport.authenticate("local", {
+router.post('/login', passport.authenticate('local', {
   successMessage: true,
   failureMessage: true,
-  failureRedirect: '/login'
+  failureRedirect: '/login',
 }), (req, res) => {
   res.status(200).send('You are successfully logged in!');
 });
 
-router.get("/loggedin", (req, res) => {
+router.get('/loggedin', (req, res) => {
   if (req.isAuthenticated()) {
     res.status(200).send('User is logged in.');
   } else {
@@ -43,7 +41,7 @@ router.get('/logout', (req, res) => {
 
 router.get('/recipes', (req, res) => {
   if (req.isAuthenticated()) {
-    Recipe.find((err, foundRecipes) => {
+    Recipe.find({}, (err, foundRecipes) => {
       res.json(foundRecipes);
     });
   } else {
@@ -69,10 +67,10 @@ router.post('/recipes', async (req, res) => {
   if (req.isAuthenticated()) {
     const recipe = new Recipe(req.body);
     await recipe.save()
-      .then(recipe => {
+      .then(() => {
         res.send(recipe);
       })
-      .catch((err) => {
+      .catch(() => {
         res.status(422).send('Recipe add failed.');
       });
   } else {
@@ -86,8 +84,8 @@ router.patch('/recipes/:_id', (req, res) => {
       .then(() => {
         res.json('Recipe updated.');
       })
-      .catch((err) => {
-        res.status(422).send("Recipe update failed.");
+      .catch(() => {
+        res.status(422).send('Recipe update failed.');
       });
   } else {
     res.status(401).send('User is not authenticated.');
@@ -101,15 +99,15 @@ router.delete('/recipes/:_id', (req, res) => {
         res.status(404).send('Recipe not found.');
       } else {
         Recipe.findByIdAndRemove(req.params._id)
-          .then(() => { res.status(200).json("Recipe deleted.") })
-          .catch((err) => {
-            res.status(400).send("Recipe delete failed.");
-          })
+          .then(() => { res.status(200).json('Recipe deleted.'); })
+          .catch(() => {
+            res.status(400).send('Recipe delete failed.');
+          });
       }
     });
   } else {
     res.status(401).send('User is not authenticated.');
   }
-})
+});
 
 export default router;

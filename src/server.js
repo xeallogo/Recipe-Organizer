@@ -1,25 +1,28 @@
+/* eslint-disable no-console */
+/* eslint-disable import/extensions */
 import express from 'express';
-import session from 'express-session'
+import session from 'express-session';
 import mongoose from 'mongoose';
-const { connect, connection } = mongoose;
-import router from './routes/index.js';
 import { resolve } from 'path';
 import passport from 'passport';
+import MongoStore from 'connect-mongo';
+import dotenv from 'dotenv';
 import User from './models/user.js';
-import MongoStore from 'connect-mongo'
-import dotenv from 'dotenv'
-dotenv.config()
+import router from './routes/index.js';
+
+const { connect, connection } = mongoose;
+dotenv.config();
 
 const PORT = process.env.PORT || 3001;
 const app = express();
 
-mongoose.set("strictQuery", false);
+mongoose.set('strictQuery', false);
 connect(process.env.MONGODB_URI, {});
 connection.once('open', () => {
   console.log('Connected to the Database.');
 });
 connection.on('error', (error) => {
-  console.log('Mongoose Connection Error: ' + error);
+  console.log(`Mongoose Connection Error: ${error}`);
 });
 
 // More Middleware
@@ -33,15 +36,15 @@ app.use(session({
   store: MongoStore.create({
     mongoUrl: process.env.MONGODB_URI,
     collectionName: 'Sessions',
-  })
+  }),
 }));
-app.use(passport.initialize()); 
+app.use(passport.initialize());
 app.use(passport.session());
 app.use('/api', router);
 
 // Passport
 passport.use(User.createStrategy());
-passport.serializeUser(User.serializeUser()); 
+passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 
 if (process.env.NODE_ENV === 'production') {
