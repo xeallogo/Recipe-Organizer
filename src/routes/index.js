@@ -22,8 +22,9 @@ router.post('/login', passport.authenticate('local', {
   successMessage: true,
   failureMessage: true,
   failureRedirect: '/login',
-}), (req, res) => {
-  res.status(200).send('You are successfully logged in!');
+}), async (req, res) => {
+  const user = await User.findOne({ username: req.body.username });
+  res.status(200).json({ id: user._id });
 });
 
 router.get('/loggedin', (req, res) => {
@@ -65,6 +66,7 @@ router.get('/recipes/:_id', (req, res) => {
 
 router.post('/recipes', async (req, res) => {
   if (req.isAuthenticated()) {
+    console.log(req.body)
     const recipe = new Recipe(req.body);
     await recipe.save()
       .then(() => {

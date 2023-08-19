@@ -1,14 +1,21 @@
-import React from "react";
+import React, { useContext, useState } from "react";
 import { post } from 'axios';
 import { useNavigate } from "react-router-dom";
-import { Form, Input, Typography, Button, Select, Card } from 'antd';
+import { Form, Input, Typography, Button, Select, Card, Progress } from 'antd';
 import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
 import { tertiaryColor } from "../../colors";
+import { UserContext } from "../../App";
+import { createWorker } from "tesseract.js";
 const { Title } = Typography;
 
 const RecipeAdd = () => {
   const [form] = Form.useForm();
   const navigate = useNavigate();
+  const { user } = useContext(UserContext)
+  const [isUploading, setIsUploading] = useState(false)
+  const [isUploaded, setIsUploaded] = useState(false)
+  const [completionPercentage, setCompletionPercentage] = useState(0)
+  const [photoText, setPhotoText] = useState('')
 
   const initialValues = {
     typeOfRecipe: '',
@@ -19,6 +26,7 @@ const RecipeAdd = () => {
 
   const handleSubmit = async (params) => {
     try {
+      params.user = user.id
       const response = await post('/api/recipes', params);
       navigate(`/recipes/${response.data._id}`);
     } catch (error) {
@@ -26,9 +34,67 @@ const RecipeAdd = () => {
     }
   }
 
+  const handleUploadPhoto = async (e) => {
+    try {
+      setIsUploading(true)
+      const files = Array.from(e.target.files)
+      const file = files[0]
+      const worker = await createWorker({
+        logger: m => {
+          if (m.progress === 1) {
+            if (m.status === 'loading tesseract core') {
+              setCompletionPercentage(10)
+            }
+            if (m.status === 'initialized tesseract') {
+              setCompletionPercentage(20)
+            }
+            if (m.status === 'loaded language traineddata') {
+              setCompletionPercentage(30)
+            }
+            if (m.status === 'initialized api') {
+              setCompletionPercentage(40)
+            }
+            if (m.status === 'recognizing text') {
+              setCompletionPercentage(100)
+            }
+          }
+          if (m.status === 'recognizing text' && m.progress !== 1) {
+            const n = Math.round(40 + (m.progress * 60))
+            setCompletionPercentage(n)
+          }
+          // console.log(m)
+        }
+      });
+      await worker.loadLanguage('eng');
+      await worker.initialize('eng');
+      const { data: { text } } = await worker.recognize(file);
+      console.log(text);
+      await worker.terminate();
+      setIsUploading(false)
+      setPhotoText(text)
+      setIsUploaded(true)
+    } catch (err) {
+      setIsUploading(false)
+      console.log(err)
+    }
+  }
+
   return (
     <div style={{ margin: 'auto', width: '60%' }}>
-      <Title style={{ color: 'white', marginTop: '30px' }}>Create a Recipe</Title>
+      <div style={{}}>
+        <Title style={{ color: 'white', marginTop: '30px' }}>Create a Recipe</Title>
+        <form onSubmit={() => { return false }}>
+        <Card>
+          <input type="file" id="myFile" name="filename" onChange={handleUploadPhoto}/>
+          {(isUploading || isUploaded) && (
+            <Progress size={80} type="circle" percent={completionPercentage} />
+          )}
+          </Card>
+        </form>
+      </div>
+      {isUploaded && (
+        <><Card>{photoText}</Card></>
+      )}
       <Form
         form={form}
         onFinish={handleSubmit}
@@ -90,7 +156,7 @@ const RecipeAdd = () => {
           <Form.List name="procedure">
             {(fields, { add, remove }) => (
               <>
-              {fields.map(({ key, name, ...restField }) => (
+                {fields.map(({ key, name, ...restField }) => (
                   <div key={key} style={{ marginBottom: '15px' }} >
                     <Form.Item
                       {...restField}

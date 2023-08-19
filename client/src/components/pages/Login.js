@@ -1,11 +1,13 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import axios from 'axios';
 import { Button, Form, Input, Typography } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { tertiaryColor } from '../../colors';
+import { UserContext } from '../../App';
 const { Title } = Typography;
 
 const LoginPage = ({setLoggedIn}) => {
+  const { user, setUser } = useContext(UserContext);
   const navigate = useNavigate();
   const [form] = Form.useForm();
 
@@ -13,6 +15,7 @@ const LoginPage = ({setLoggedIn}) => {
     try {
       const response = await axios.post('/api/login', params);
       if (response.status === 200) {
+        setUser(response.data)
         setLoggedIn(true)
         navigate('/recipes')
       }

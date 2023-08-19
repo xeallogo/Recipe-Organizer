@@ -45,11 +45,16 @@ const layoutStyle = {
   margin: 0,
 };
 
+export const UserContext = React.createContext();
+
 const App = () => {
+  const [user, setUser] = useState({});
   return (
     <div className="App">
       <Router>
-        <Navigation />
+        <UserContext.Provider value={{user, setUser}}>
+          <Navigation />
+        </UserContext.Provider>
       </Router>
     </div>
   );
@@ -69,7 +74,7 @@ const Navigation = () => {
       })
       .catch((error) => {
         setLoggedIn(false)
-    });
+      });
   }, []);
 
   const handleLogout = async () => {
@@ -131,13 +136,13 @@ const Navigation = () => {
         </Header>
         <Content style={contentStyle}>
           <Routes>
-            <Route path="/login" element={<LoginPage setLoggedIn={setLoggedIn}/>} />
+            <Route path="/login" element={<LoginPage setLoggedIn={setLoggedIn} />} />
             <Route path="/signup" element={<SignupPage />} />
             <Route path="/recipes" element={<RecipeList />} />
             <Route path="/recipes/new" element={<RecipeAdd />} />
             <Route path="/recipes/:_id" element={<RecipeInfo />} />
             <Route path="/recipes/:_id/edit" element={<RecipeEdit />} />
-            <Route exact path="/" element={<Home />} />
+            <Route exact path="/" element={loggedIn ? <Home /> : <LoginPage setLoggedIn={setLoggedIn} />} />
           </Routes>
         </Content>
         <Footer style={footerStyle}>

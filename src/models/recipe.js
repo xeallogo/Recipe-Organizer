@@ -18,6 +18,11 @@ const recipeSchema = new Schema({
     type: String,
     required: [true, 'Preparation are required.'],
   }],
+  user: {
+    type: Schema.Types.ObjectId,
+    required: [true, 'User is required.'],
+    ref: 'User',
+  },
 });
 
 export default model('Recipe', recipeSchema, 'Recipes');
