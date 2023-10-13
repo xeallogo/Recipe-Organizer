@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { post } from 'axios';
 import { useNavigate } from "react-router-dom";
 import { Form, Input, Typography, Button, Select, Card, Progress } from 'antd';
@@ -15,7 +15,12 @@ const RecipeAdd = () => {
   const [isUploading, setIsUploading] = useState(false)
   const [isUploaded, setIsUploaded] = useState(false)
   const [completionPercentage, setCompletionPercentage] = useState(0)
-  const [photoText, setPhotoText] = useState('')
+  const [items, setItems] = useState([]);
+  const [ingredients, setIngredients] = useState([]);
+  const [steps, setSteps] = useState([]);
+  const [firstItem, setFirstItem] = useState('');
+  const [secondItem, setSecondItem] = useState('')
+
 
   const initialValues = {
     typeOfRecipe: '',
@@ -23,6 +28,11 @@ const RecipeAdd = () => {
     ingredients: [''],
     procedure: ['']
   }
+
+  useEffect(() => {
+    form.setFieldValue('ingredients', ingredients)
+    form.setFieldValue('steps', steps)
+  }, [form, ingredients, steps])
 
   const handleSubmit = async (params) => {
     try {
@@ -32,6 +42,29 @@ const RecipeAdd = () => {
     } catch (error) {
       console.log('error', error);
     }
+  }
+
+  const HandlePhotoText = (text) => {
+    const array = text.split('e ');
+    setItems(array)
+  }
+
+  const addIngredient = (ingredient) => {
+    const newList = ingredients.concat([ingredient])
+    setIngredients(newList)
+  }
+
+  const addStep = (step) => {
+    const newList = steps.concat([step])
+    setSteps(newList)
+  }
+
+  const removeItem = (array, item) => {
+    const index = array.indexOf(item);
+    if (index > -1) { // only splice array when item is found
+      array.splice(index, 1); // 2nd parameter means remove one item only
+    }
+    return array
   }
 
   const handleUploadPhoto = async (e) => {
@@ -62,7 +95,6 @@ const RecipeAdd = () => {
             const n = Math.round(40 + (m.progress * 60))
             setCompletionPercentage(n)
           }
-          // console.log(m)
         }
       });
       await worker.loadLanguage('eng');
@@ -71,12 +103,25 @@ const RecipeAdd = () => {
       console.log(text);
       await worker.terminate();
       setIsUploading(false)
-      setPhotoText(text)
+      //setPhotoText(text)
       setIsUploaded(true)
+      HandlePhotoText(text)
     } catch (err) {
       setIsUploading(false)
       console.log(err)
     }
+  }
+
+  const handleDrop = (item1, item2) => {
+    console.log(items)
+    let newArray;
+    if (items.indexOf(item1) === -1) {
+      newArray = removeItem(items, item1)
+    }
+    if (items.indexOf(item2) === -1) {
+      newArray = removeItem(items, item2)
+    }
+    setItems(newArray)
   }
 
   return (
@@ -84,16 +129,58 @@ const RecipeAdd = () => {
       <div style={{}}>
         <Title style={{ color: 'white', marginTop: '30px' }}>Create a Recipe</Title>
         <form onSubmit={() => { return false }}>
-        <Card>
-          <input type="file" id="myFile" name="filename" onChange={handleUploadPhoto}/>
-          {(isUploading || isUploaded) && (
-            <Progress size={80} type="circle" percent={completionPercentage} />
-          )}
+          <Card>
+            <input type="file" id="myFile" name="filename" onChange={handleUploadPhoto} />
+            {(isUploading || isUploaded) && (
+              <Progress size={80} type="circle" percent={completionPercentage} />
+            )}
           </Card>
         </form>
       </div>
-      {isUploaded && (
-        <><Card>{photoText}</Card></>
+      {isUploaded && items && (
+        <>
+          <Card style={{ whiteSpace: "pre-line", textAlign: 'left' }}>
+          {console.log(items)}
+            {items.map((item, i) => {
+              return (
+                <Input
+                  draggable
+                  onDragStart={() => setFirstItem(item)}
+                  onDragOver={(e) => {
+                    e.preventDefault()
+                    setSecondItem(item)
+                  }}
+                  onDrop={(e) => {
+                    e.preventDefault()
+                    handleDrop(firstItem, secondItem)
+                    }}
+                  value={item}
+                  key={i}
+                  addonAfter={(
+                    <>
+                      <Button
+                        onClick={() => {
+                          addIngredient(item)
+                          const newList = removeItem(items, item)
+                          setItems(newList)
+                        }}
+                        icon=<PlusOutlined />
+                      >Add ingredient</Button>
+                      <Button
+                        onClick={() => {
+                          addStep(item)
+                          const newList = removeItem(items, item)
+                          setItems(newList)
+                        }}
+                        icon=<PlusOutlined />
+                      >Add step</Button>
+                    </>
+                  )}
+                  placeholder="Item" />
+              )
+            })}
+          </Card>
+        </>
       )}
       <Form
         form={form}
@@ -143,7 +230,7 @@ const RecipeAdd = () => {
                   </div>
                 ))}
                 <Form.Item>
-                  <Button type="dashed" onClick={() => add()} block icon={<PlusOutlined />}>
+                  <Button type="dashed" onClick={() => add()} block icon=<PlusOutlined />>
                     Add an ingredient
                   </Button>
                 </Form.Item>
@@ -153,7 +240,7 @@ const RecipeAdd = () => {
         </Card>
         <Title style={{ textAlign: 'left', color: 'white', margin: "30px 0 10px 0" }} level={3}>Preparation</Title>
         <Card>
-          <Form.List name="procedure">
+          <Form.List name="steps">
             {(fields, { add, remove }) => (
               <>
                 {fields.map(({ key, name, ...restField }) => (

@@ -66,7 +66,6 @@ router.get('/recipes/:_id', (req, res) => {
 
 router.post('/recipes', async (req, res) => {
   if (req.isAuthenticated()) {
-    console.log(req.body)
     const recipe = new Recipe(req.body);
     await recipe.save()
       .then(() => {

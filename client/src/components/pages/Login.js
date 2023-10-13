@@ -7,7 +7,7 @@ import { UserContext } from '../../App';
 const { Title } = Typography;
 
 const LoginPage = ({setLoggedIn}) => {
-  const { user, setUser } = useContext(UserContext);
+  const { setUser } = useContext(UserContext);
   const navigate = useNavigate();
   const [form] = Form.useForm();
 
